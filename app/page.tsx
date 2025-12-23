@@ -5,6 +5,7 @@ import BookingForm from '@/components/custom/BookingForm';
 import Contact from '@/components/custom/Contact';
 import Dining from '@/components/custom/Dining';
 import Footer from '@/components/custom/Footer';
+import Gallery from '@/components/custom/Gallery';
 import Hero from '@/components/custom/Hero';
 import Navigation from '@/components/custom/Navigation';
 import Rooms from '@/components/custom/Rooms';
@@ -105,6 +106,7 @@ export default function Page() {
       <Rooms />
       <Dining />
       <Amenities />
+      <Gallery/>
       <BookingForm />
       <Contact />
       <Footer />

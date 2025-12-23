@@ -1,18 +1,27 @@
-import { Mountain, } from "lucide-react";
+import URL from "@/app/constant";
+import Image from "next/image";
 import Typography from "../Typography";
 const Footer = () => {
   return (
     <footer className="bg-[#0D0A1F] py-12 px-6 border-t border-[#7570BC]/30">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-9xl mx-auto">
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Mountain className="text-[#7570BC]" size={32} />
-              <Typography variant="brand" textColor="white" weight="bold">
-                Master Retreat
-              </Typography>
-            </div>
-            <Typography variant="paragraph" textColor="cream">
+            <div className="flex items-center gap-2">
+          <Image
+            src={URL.LOGO}
+            alt="Homestay Name"
+            width={70}
+            height={70}
+            priority 
+          />
+          {/*<Mountain className="text-[#7570BC]" size={32} />*/}
+          <Typography variant="brand" textColor="white" weight="bold"  >
+          A Boutique Homestay
+          </Typography>
+        </div>
+           
+            <Typography variant="paragraph" textColor="cream" className="ml-20 ">
               Your home away from home in the mountains
             </Typography>
           </div>
@@ -57,13 +66,13 @@ const Footer = () => {
             </Typography>
             <div className="flex flex-col gap-2">
               <Typography variant="small" textColor="cream">
-                +91 98765 43210
+                {URL.PHOME_NO}
               </Typography>
               <Typography variant="small" textColor="cream">
-                info@masterretreat.com
+                {URL.EMAIL}
               </Typography>
               <Typography variant="small" textColor="cream">
-                Manali, Himachal Pradesh
+                {URL.LOCATION}
               </Typography>
             </div>
           </div>
@@ -71,7 +80,7 @@ const Footer = () => {
         
         <div className="border-t border-[#7570BC]/30 pt-8 text-center">
           <Typography variant="paragraph" textColor="cream">
-            © 2024 Master Retreat. All rights reserved.
+            © 2026 Aamantaran a Boutique Homestay. All rights reserved.
           </Typography>
         </div>
       </div>

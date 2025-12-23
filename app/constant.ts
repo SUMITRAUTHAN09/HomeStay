@@ -4,10 +4,10 @@ const URL = {
   LOCATION:"Rudraprayag, Uttarakhand, India (246171)",
   PHOME_NO:"+91 9876543210",
   EMAIL:"aamantran@gmail.com",
-  ALTITUDE:"2936 m",
-  AVG_TEMP:"(0-10 °C) Winter | (20-35 °C) Summer",
-  LOGO:"/images/logo.jpeg",
-  LOGO_NAME:"/images/logoImage",
+  ALTITUDE:"2936f",
+  AVG_TEMP:"10°C",
+  LOGO:"/images/go.png",
+  LOGO_NAME:"/images/logoImage1.jpeg",
 } as const;
 
 export default URL;
@@ -51,3 +51,34 @@ export const RoomsType=  [
     { icon: Trees, title: "Nature Walks", desc: "Scenic forest paths" },
     { icon: Coffee, title: "24/7 Tea/Coffee", desc: "Complimentary beverages anytime" }
   ];
+
+  export const NavItem=["Home", "Rooms", "Dining", "Amenities", "Booking"];
+
+ export const menuImages = [
+   "/food/image1.jpg",
+   "/food/image2.jpg",
+   "/food/image3.jpg",
+   "/food/image4.jpg",
+   "/food/image5.jpg",
+   "/food/image6.jpg",
+   "/food/image7.jpg",
+   "/food/image8.jpg",
+ ];
+
+ export const heroImages = [
+  "/hero/img1.jpg",
+  "/hero/img2.jpg",
+  "/hero/img3.jpg",
+  "/hero/img4.jpg",
+];
+
+export const galleryImages=[
+  "/gallery/pop1.jpg",
+  "/gallery/pop2.jpg",
+  "/gallery/pop3.jpg",
+  "/gallery/pop4.jpg",
+  "/gallery/pop5.jpg",
+  "/gallery/pop6.jpg",
+  "/gallery/pop7.jpg",
+  "/gallery/pop8.jpg",
+]

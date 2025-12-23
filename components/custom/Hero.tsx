@@ -1,7 +1,7 @@
 import URL from "@/app/constant";
 import { ChevronRight, MapPin, Star } from "lucide-react";
-import Image from "next/image";
 import Typography from "../Typography";
+import HeroBackgroundCarousel from "../background/HeroBackground";
 
 interface HeroProps {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -11,27 +11,23 @@ const Hero: React.FC<HeroProps> = ({ canvasRef }) => {
   return (
     <section
       id="home"
-      className="relative h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-[#C7DBF7] via-[#BFC7DE] to-[#C9A177]"
+      className="relative h-screen flex items-center justify-center overflow-hidden"
     >
-      <canvas ref={canvasRef} className="absolute inset-0 z-0" />
+     <HeroBackgroundCarousel/>
 
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#C9A177]/30 to-[#C9A177] z-10" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#C9A177]/10 to-[#C9A177] z-1" />
 
       <div className="relative z-20 text-center px-6 max-w-5xl">
         <div className="flex items-center justify-center gap-2 mb-4">
-          <Image
-            src={URL.LOGO}
-            alt="Homestay Logo"
-            width={120}
-            height={60}
-            priority
-            
-          /></div>
+          <Typography variant="h1" textColor="primary" weight="extrabold">
+            Aamantran
+          </Typography>
+          </div>
         <div className="flex items-center justify-center gap-2 mb-4">
           
           <MapPin className="text-[#7570BC]" size={24} />
           <Typography variant="paragraph" textColor="primary" weight="semibold">
-            Rudraprayag, Uttarakhand, India
+           {URL.LOCATION}
           </Typography>
         </div>
 
@@ -82,33 +78,33 @@ const Hero: React.FC<HeroProps> = ({ canvasRef }) => {
         </div>
 
         <div className="grid grid-cols-3 gap-8 mt-16 max-w-2xl mx-auto">
-          <div className="text-center">
+          <div className="text-center flex flex-col items-center">
             <Typography
               variant="h3"
               textColor="primary"
               weight="bold"
               className="mb-2"
             >
-              2936m
+              {URL.ALTITUDE}
             </Typography>
             <Typography variant="muted" textColor="secondary">
               Altitude
             </Typography>
           </div>
-          <div className="text-center">
+          <div className="text-center flex flex-col items-center">
             <Typography
               variant="h3"
               textColor="primary"
               weight="bold"
               className="mb-2"
             >
-              15°C
+              {URL.AVG_TEMP}
             </Typography>
             <Typography variant="muted" textColor="secondary">
               Avg Temp
             </Typography>
           </div>
-          <div className="text-center">
+          <div className="text-center flex flex-col items-center">
             <div className="flex items-center justify-center gap-1 mb-2">
               <Star className="fill-yellow-500 text-yellow-500" size={28} />
               <Typography variant="h3" textColor="primary" weight="bold">

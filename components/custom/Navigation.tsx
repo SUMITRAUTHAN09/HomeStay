@@ -1,8 +1,7 @@
-import URL from "@/app/constant";
-import { Menu, Mountain, Phone, X } from "lucide-react";
+import URL, { NavItem } from "@/app/constant";
+import { Menu, Phone, X } from "lucide-react";
 import Image from "next/image";
 import Typography from "../Typography";
-
 interface NavigationProps {
   menuOpen: boolean;
   setMenuOpen: (open: boolean) => void;
@@ -22,23 +21,23 @@ const Navigation: React.FC<NavigationProps> = ({
         backdropFilter: scrollY > 50 ? "blur(12px)" : "none",
       }}
     >
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="max-w-9xl mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Image
-            src={URL.LOGO_NAME}
-            alt="Homestay Name"
-            width={120}
-            height={60}
-            priority
+            src={URL.LOGO}
+            alt="Homestay Logo"
+            width={50}
+            height={50}
+            priority 
           />
-          <Mountain className="text-[#7570BC]" size={32} />
-          <Typography variant="brand" textColor="white" weight="bold">
-            Master Retreat
+          {/*<Mountain className="text-[#7570BC]" size={32} />*/}
+          <Typography variant="brand" textColor="white" weight="bold" >
+          A Boutique Homestay
           </Typography>
         </div>
 
         <div className="hidden md:flex gap-8">
-          {["Home", "Rooms", "Dining", "Amenities", "Booking"].map((item) => (
+          {NavItem.map((item) => (
             <a
               key={item}
               href={`#${item.toLowerCase()}`}
