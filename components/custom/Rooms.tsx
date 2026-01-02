@@ -118,7 +118,7 @@ const Rooms = () => {
                   </div>
                   <a
                     href="#booking"
-                    className="bg-[#C59594] text-white px-5 sm:px-6 py-2 rounded-full hover:bg-[#7570BC] transition-all"
+                    className="bg-[#734746] text-white px-5 sm:px-6 py-2 rounded-full hover:bg-[#7570BC] transition-all"
                   >
                     <Typography
                       variant="small"

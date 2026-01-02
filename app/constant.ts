@@ -174,12 +174,6 @@ export const formFields = [
     placeholder: "Enter your full name",
   },
   {
-    label: "Email",
-    name: "email",
-    type: "email",
-    placeholder: "your@email.com",
-  },
-  {
     label: "Phone",
     name: "phone",
     type: "tel",

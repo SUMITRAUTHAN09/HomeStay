@@ -39,10 +39,10 @@ export default function Photos() {
 
         {/* Navigation Buttons */}
        <CarouselPrevious
-  className="h-14 w-14 bg-white/80 hover:bg-white shadow-lg [&_svg]:h-6 [&_svg]:w-6 -left-6"
+  className="h-10 w-10 bg-white/80 hover:bg-white shadow-lg [&_svg]:h-6 [&_svg]:w-6 -left-6"
 />
 <CarouselNext
-  className="h-14 w-14 bg-white/80 hover:bg-white shadow-lg [&_svg]:h-6 [&_svg]:w-6 -right-6"
+  className="h-10 w-10 bg-white/80 hover:bg-white shadow-lg [&_svg]:h-6 [&_svg]:w-6 -right-6"
 />
       </Carousel>
     </div>

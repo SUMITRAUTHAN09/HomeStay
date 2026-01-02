@@ -57,7 +57,7 @@ const Hero: React.FC<HeroProps> = ({ canvasRef }) => {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a
             href="#booking"
-            className="bg-[#7570BC] text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full hover:bg-[#C59594] transition-all transform hover:scale-105"
+            className="bg-gradient-to-r from-[#0F766E] to-[#22C55E] text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full hover:bg-[#C59594] transition-all transform hover:scale-105"
           >
             <Typography variant="paragraph" textColor="white" weight="semibold">
               Book Your Stay
@@ -66,11 +66,11 @@ const Hero: React.FC<HeroProps> = ({ canvasRef }) => {
 
           <a
             href="#rooms"
-            className="border-2 border-[#7570BC] text-[#7570BC] px-6 sm:px-8 py-3 sm:py-4 rounded-full hover:bg-[#7570BC]/10 transition-all"
+            className="bg-gradient-to-r from-[#0F172A] to-[#1D4ED8] text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full hover:bg-[#C59594] transition-all transform hover:scale-105"
           >
             <Typography
               variant="paragraph"
-              textColor="accent"
+              textColor="white"
               weight="semibold"
             >
               Explore Rooms
