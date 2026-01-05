@@ -11,12 +11,34 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { api } from "@/lib/api-clients";
+import { setAdminToken, setAdminEmail } from "@/lib/auth";
 import { useFormik } from "formik";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import * as Yup from "yup";
+import Cookies from 'js-cookie';
+
+// ✅ TypeScript interfaces for type safety
+interface LoginResponseData {
+  token: string;
+  user: {
+    email: string;
+    id: string;
+    name?: string;
+    role: string;
+  };
+}
+
+interface LoginResponse {
+  success: boolean;
+  data?: LoginResponseData;
+  error?: string;
+  message?: string;
+  statusCode?: number;
+}
 
 /* ------------------ Validation Schema ------------------ */
 const loginSchema = Yup.object({
@@ -25,31 +47,73 @@ const loginSchema = Yup.object({
     .required("Email is required"),
 
   password: Yup.string()
-    .min(8, "Password must be at least 8 characters")
-    .matches(/[a-z]/, "Must contain at least one lowercase letter")
-    .matches(/[A-Z]/, "Must contain at least one uppercase letter")
-    .matches(/[0-9]/, "Must contain at least one number")
-    .matches(/[@$!%*?&]/, "Must contain at least one special character")
     .required("Password is required"),
-
-  rememberMe: Yup.boolean(),
 });
 
 export default function Page() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   /* ------------------ Formik Setup ------------------ */
   const formik = useFormik({
     initialValues: {
       email: "",
       password: "",
-      rememberMe: false,
     },
     validationSchema: loginSchema,
-    onSubmit: (values) => {
-      console.log("Login Data:", values);
-      // API call
+    onSubmit: async (values) => {
+      setIsLoading(true);
+      setError("");
+
+      try {
+        const response = await api.auth.login({
+          email: values.email,
+          password: values.password,
+          rememberMe: false, // Always false - session only
+        });
+
+        console.log('🔐 Login response:', response);
+
+        if (response.success && response.data) {
+          // ✅ Type-safe access
+          const loginData = response.data as LoginResponseData;
+          const { token, user } = loginData;
+          
+          console.log('✅ Login successful, setting tokens...');
+          
+          // Store in localStorage
+          setAdminToken(token);
+          setAdminEmail(user.email);
+
+          // ✅ CRITICAL: Set SESSION-ONLY cookie
+          // No expires/maxAge = cookie deleted when browser closes
+          Cookies.set('adminToken', token, {
+            path: '/',           // Available to all routes
+            sameSite: 'lax',     // CSRF protection
+            secure: false,       // Set to true in production with HTTPS
+            // NO expires or maxAge = session cookie!
+          });
+
+          console.log('✅ Session cookie set, redirecting to dashboard...');
+
+          // Small delay to ensure cookie is set
+          setTimeout(() => {
+            router.push('/admin/dashboard');
+          }, 100);
+        } else {
+          // ✅ Backend error handling
+          console.error('❌ Login failed:', response.error || response.message);
+          setError(response.error || response.message || 'Login failed. Please try again.');
+        }
+      } catch (err: any) {
+        // Only true network errors reach here
+        console.error('❌ Login network error:', err);
+        setError('Unable to connect to server. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
     },
   });
 
@@ -62,15 +126,15 @@ export default function Page() {
       <Card className="w-full max-w-md shadow-2xl relative z-10 border-2 border-[#BFC7DE] bg-white/80 backdrop-blur-md p-6">
         <CardHeader className="space-y-4 pb-8">
           <div className="flex justify-center">
-           <div className="flex justify-center mb-2">
-            <Image
-              src={URL.LOGO}
-              alt="Homestay Logo"
-              width={200}
-              height={200}
-              priority
-            />
-          </div>
+            <div className="flex justify-center mb-2">
+              <Image
+                src={URL.LOGO}
+                alt="Homestay Logo"
+                width={200}
+                height={200}
+                priority
+              />
+            </div>
           </div>
 
           <Typography variant="h2" textColor="primary" weight="bold" align="center">
@@ -86,6 +150,15 @@ export default function Page() {
 
         <CardContent>
           <form onSubmit={formik.handleSubmit} className="space-y-6">
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                <Typography variant="small" className="text-red-700">
+                  {error}
+                </Typography>
+              </div>
+            )}
+
             {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email">
@@ -105,6 +178,7 @@ export default function Page() {
                   value={formik.values.email}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
+                  disabled={isLoading}
                 />
               </div>
 
@@ -132,13 +206,14 @@ export default function Page() {
                   value={formik.values.password}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
+                  disabled={isLoading}
                 />
 
-                {/* Single Toggle Button */}
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7570BC] cursor-pointer"
+                  disabled={isLoading}
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -153,10 +228,13 @@ export default function Page() {
               )}
             </div>
 
-            {/* Remember Me */}
-            <div className="flex justify-between items-center">
-              <button className="text-sm text-[#7570BC] font-semibold cursor-pointer"
-              onClick={()=>router.push('/forgotpassword')}
+            {/* Forgot Password */}
+            <div className="flex justify-end items-center">
+              <button 
+                type="button"
+                className="text-sm text-[#7570BC] font-semibold cursor-pointer hover:underline"
+                onClick={() => router.push('/forgotpassword')}
+                disabled={isLoading}
               >
                 Forgot password?
               </button>
@@ -165,25 +243,27 @@ export default function Page() {
             {/* Submit */}
             <Button
               type="submit"
-              className="w-full h-12 bg-[#7570BC] hover:bg-[#C59594] cursor-pointer"
+              className="w-full h-12 bg-[#7570BC] hover:bg-[#C59594]"
+              disabled={isLoading}
             >
-              Sign In
+              {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
 
             {/* Back Home */}
             <Button
               type="button"
               variant="outline"
-              className="w-full h-12 cursor-pointer"
+              className="w-full h-12"
               onClick={() => router.push("/")}
+              disabled={isLoading}
             >
-               <Image
-              src={URL.LOGO}
-              alt="Homestay Logo"
-              width={30}
-              height={30}
-              priority
-            />
+              <Image
+                src={URL.LOGO}
+                alt="Homestay Logo"
+                width={30}
+                height={30}
+                priority
+              />
               Back to Home
             </Button>
           </form>
