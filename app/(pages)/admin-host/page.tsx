@@ -778,50 +778,73 @@ function FeatureListEditor({
   };
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <Typography variant="label" textColor="secondary">
-          {label}
-        </Typography>
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="text-gray-600 hover:text-gray-700 p-1"
-        >
-          {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-        </button>
-      </div>
+   <div className="space-y-2">
+  {/* Header */}
+  <div className="flex items-center justify-between">
+    <Typography variant="label" textColor="secondary">
+      {label}
+    </Typography>
 
-      {isExpanded && (
-        <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
-          {items.map((item, index) => (
-            <div
-              key={index}
-              className="flex items-center gap-2 p-3 bg-white border rounded"
-            >
-              <input
-                type="text"
-                value={item}
-                onChange={(e) => updateItem(index, e.target.value)}
-                className="flex-1 p-2 border border-gray-300 rounded"
-              />
-              <button
-                onClick={() => removeItem(index)}
-                className="text-red-600 hover:text-red-700"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
-          ))}
+    <button
+      onClick={() => setIsExpanded(!isExpanded)}
+      className="p-1 text-gray-600 hover:text-gray-700"
+    >
+      {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+    </button>
+  </div>
+
+  {isExpanded && (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 rounded-lg">
+      {items.map((item, index) => (
+        <div
+          key={index}
+          className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3 bg-white border rounded-lg"
+        >
+          <input
+            type="text"
+            value={item}
+            onChange={(e) => updateItem(index, e.target.value)}
+            className="w-full sm:flex-1 p-2 border border-gray-300 rounded-lg text-sm"
+          />
 
           <button
-            onClick={addItem}
-            className="col-span-2 w-full py-2 border border-dashed border-gray-300 rounded text-sm text-gray-600 hover:border-blue-500 hover:text-blue-600 transition-colors"
+            onClick={() => removeItem(index)}
+            className="
+              flex items-center justify-center
+              px-3 py-2
+              rounded-lg
+              border border-red-200
+              text-red-600
+              hover:bg-red-50
+              hover:text-red-700
+              transition
+            "
           >
-            + Add Item
+            <Trash2 size={16} />
           </button>
         </div>
-      )}
+      ))}
+
+      {/* Add Button */}
+      <button
+        onClick={addItem}
+        className="
+          col-span-1 sm:col-span-2
+          w-full py-2
+          border border-dashed border-gray-300
+          rounded-lg text-sm
+          text-gray-600
+          hover:border-blue-500
+          hover:text-blue-600
+          transition-colors
+        "
+      >
+        + Add Item
+      </button>
     </div>
+  )}
+</div>
+
   );
 }
 
