@@ -76,7 +76,7 @@ interface DataStructure {
     menuItems: MenuItem[];
     images: string[];
   };
-  
+
   gallery: {
     title: string;
     subtitle: string;
@@ -87,8 +87,7 @@ interface DataStructure {
 
 // Initial data structure
 const initialData: DataStructure = {
-  hero:
-  {
+  hero: {
     title: "Aamantran",
     location: "Rudraprayag, Uttarakhand, India (246171)",
     subtitle: "A Perfect Time for",
@@ -105,7 +104,7 @@ const initialData: DataStructure = {
       "/hero/img44.jpg",
     ],
   },
-  
+
   rooms: [
     {
       name: "Deluxe Mountain View",
@@ -250,7 +249,7 @@ export default function AdminHostPage() {
     setHasChanges(true);
   };
 
-  const updateArrayItem = <T extends "rooms"  >(
+  const updateArrayItem = <T extends "rooms">(
     section: T,
     index: number,
     field: keyof DataStructure[T][number],
@@ -265,7 +264,7 @@ export default function AdminHostPage() {
     setHasChanges(true);
   };
 
-  const addArrayItem = <T extends "rooms"  >(
+  const addArrayItem = <T extends "rooms">(
     section: T,
     newItem: DataStructure[T][number]
   ) => {
@@ -276,10 +275,7 @@ export default function AdminHostPage() {
     setHasChanges(true);
   };
 
-  const removeArrayItem = <T extends "rooms"  >(
-    section: T,
-    index: number
-  ) => {
+  const removeArrayItem = <T extends "rooms">(section: T, index: number) => {
     setData((prev) => ({
       ...prev,
       [section]: prev[section].filter((_, i) => i !== index),
@@ -306,7 +302,7 @@ export default function AdminHostPage() {
     <div className="min-h-screen bg-gray-300">
       {/* Fixed Header */}
       <div className="fixed top-0 left-0 right-0 bg-gray-200 border-b shadow-sm z-50">
-        <div className="max-w-9xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-9xl mx-auto px-4 py-4 flex items-center justify-between m-2">
           <div>
             <Typography variant="h2" weight="bold">
               Admin Dashboard
@@ -314,24 +310,6 @@ export default function AdminHostPage() {
             <Typography variant="paragraph">
               Edit your homestay content
             </Typography>
-          </div>
-          {/* Section Navigation */}
-          <div className="flex flex-wrap gap-2">
-            {(["hero", "rooms", "dining", "gallery"] as const).map(
-              (section) => (
-                <button
-                  key={section}
-                  onClick={() => setActiveSection(section)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    activeSection === section
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  {section.charAt(0).toUpperCase() + section.slice(1)}
-                </button>
-              )
-            )}
           </div>
 
           <div className="flex gap-3">
@@ -350,9 +328,29 @@ export default function AdminHostPage() {
             </button>
           </div>
         </div>
+        {/* Section Navigation */}
+        <div className="max-w-7xl mx-auto px-4 pb-4 flex item-center justify-center">
+          <div className="flex flex-wrap gap-2">
+            {(["hero", "rooms", "dining", "gallery"] as const).map(
+              (section) => (
+                <button
+                  key={section}
+                  onClick={() => setActiveSection(section)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    activeSection === section
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {section.charAt(0).toUpperCase() + section.slice(1)}
+                </button>
+              )
+            )}
+          </div>
+        </div>
       </div>
 
-      <div className="pt-24 pb-8 px-4 max-w-7xl mx-auto mt-5">
+      <div className="pt-60 md:mt-[-40] pb-8 px-4 max-w-7xl mx-auto">
         {/* Hero Section */}
         {activeSection === "hero" && (
           <div className="space-y-6">
@@ -890,26 +888,26 @@ function ImageListEditor({ label, images, onUpdate }: ImageListEditorProps) {
         <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
           {items.map((img, index) => (
             <div key={index} className="space-y-2">
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="file"
                   accept="image/*"
                   onChange={(e) =>
                     selectImage(index, e.target.files?.[0] || null)
                   }
-                  className="flex-1 p-2 border border-gray-300 rounded text-sm"
+                  className="w-full sm:flex-1 p-2 border border-gray-300 rounded-lg text-sm file:mr-3 file:py-1 file:px-3 file:border-0"
                 />
 
                 <button
                   onClick={() => removeImage(index)}
-                  className="text-red-600 hover:text-red-700 p-2"
+                  className=" flex items-center justify-center px-3 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 transition"
                 >
                   <Trash2 size={16} />
                 </button>
               </div>
 
               {img && (
-                <div className="relative h-60 w-134 bg-gray-200 rounded overflow-hidden">
+                <div className="relative w-full h-40 sm:h-48 md:h-60 bg-gray-200 rounded-lg overflow-hidden">
                   <img
                     src={img}
                     alt={`Preview ${index}`}

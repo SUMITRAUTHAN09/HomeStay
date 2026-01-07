@@ -1,5 +1,5 @@
 import URL, { NavItem } from "@/app/constant";
-import { Menu, Phone, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Typography from "../Typography";
 
@@ -53,16 +53,6 @@ const Navigation: React.FC<NavigationProps> = ({
             </a>
           ))}
         </div>
-
-        <a
-          href="tel:+919876543210"
-          className="hidden md:flex items-center gap-2 bg-[#7570BC] text-white px-5 lg:px-6 py-2 rounded-full hover:bg-[#C59594] transition-all"
-        >
-          <Phone size={18} />
-          <Typography variant="small" textColor="white" weight="semibold">
-            Call Us
-          </Typography>
-        </a>
 
         <button
           onClick={() => setMenuOpen(!menuOpen)}
