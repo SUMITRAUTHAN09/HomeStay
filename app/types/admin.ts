@@ -1,3 +1,5 @@
+// app/types/admin.ts
+
 export interface Booking {
   _id: string;
   guestName: string;
@@ -47,4 +49,5 @@ export interface GalleryImage {
   uploadedAt: string;
 }
 
-export type TabType = 'photos' | 'bookings' | 'rooms';
+// UPDATED: Added 'menu' to TabType
+export type TabType = 'photos' | 'bookings' | 'rooms' | 'menu';

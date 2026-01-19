@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Loader } from 'lucide-react';
 import { api } from '@/lib/api-clients';
-import { Room, Booking, GalleryImage, TabType } from '@/app/types/admin';
+import { Room, Booking, TabType } from '@/app/types/admin';
 
 // Import all components
 import AdminHeader from '@/components/admin/AdminHeader';
@@ -12,6 +12,7 @@ import TabNavigation from '@/components/admin/TabNavigation';
 import RoomsTab from '@/components/admin/RoomsTab';
 import BookingsTab from '@/components/admin/BookingsTab';
 import PhotosTab from '@/components/admin/PhotosTab';
+import MenuTab from '@/components/admin/MenuTab';
 import RoomEditModal from '@/components/RoomEditModal';
 
 export default function AdminDashboard() {
@@ -70,7 +71,6 @@ export default function AdminDashboard() {
       console.log('📥 Admin rooms response:', response);
       
       if (response.success) {
-        // Handle different response structures
         const roomData = (response.data as any)?.rooms || 
                         (response.data as any)?.data || 
                         response.data || 
@@ -79,7 +79,6 @@ export default function AdminDashboard() {
         console.log('✅ Room data extracted:', roomData);
         setRooms(Array.isArray(roomData) ? roomData : []);
       } else {
-        // Check for authentication errors
         if (response.error?.includes('401') || 
             response.error?.includes('Unauthorized') || 
             response.error?.includes('token')) {
@@ -90,12 +89,10 @@ export default function AdminDashboard() {
           return;
         }
         
-        // Check if it's a 404 error (route not found)
         if (response.error?.includes('404') || 
             response.error?.includes('Not Found') ||
             response.statusCode === 404) {
           console.error('⚠️ Admin rooms endpoint not found. Using fallback public endpoint.');
-          // Fallback: If /admin/rooms doesn't exist, log the issue but don't crash
           setError('Admin rooms endpoint not configured. Contact support.');
           setRooms([]);
           return;
@@ -106,7 +103,6 @@ export default function AdminDashboard() {
     } catch (err: any) {
       console.error('❌ Failed to load rooms:', err);
       
-      // Don't throw if it's a network/404 error, just show empty state
       if (err.message?.includes('Not Found') || err.message?.includes('404')) {
         setError('Unable to load rooms. The admin endpoint may not be configured.');
         setRooms([]);
@@ -225,7 +221,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // Wrapper function to handle the type mismatch
   const handleEditRoomWrapper = (room: Room) => {
     setEditingRoom(room);
   };
@@ -286,6 +281,13 @@ export default function AdminDashboard() {
 
         {activeTab === 'photos' && (
           <PhotosTab 
+            onSuccess={showSuccess}
+            onError={setError}
+          />
+        )}
+
+        {activeTab === 'menu' && (
+          <MenuTab 
             onSuccess={showSuccess}
             onError={setError}
           />

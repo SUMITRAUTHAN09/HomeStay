@@ -11,10 +11,10 @@ cloudinary.config({
 });
 
 /**
- * POST /api/gallery/delete
+ * DELETE /api/gallery/delete
  * Delete image from gallery (Cloudinary or local)
  */
-export async function POST(request: NextRequest) {
+export async function DELETE(request: NextRequest) {
   try {
     // Verify admin authentication
     const token = request.headers.get('authorization')?.replace('Bearer ', '');

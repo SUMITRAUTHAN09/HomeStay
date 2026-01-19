@@ -173,8 +173,11 @@ class ApiClient {
     });
   }
 
-  async delete<T>(endpoint: string): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
+  async delete<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, { 
+      method: 'DELETE',
+      body: data ? JSON.stringify(data) : undefined,
+    });
   }
 
   async upload<T>(endpoint: string, formData: FormData): Promise<ApiResponse<T>> {
@@ -234,8 +237,8 @@ const apiClient = new ApiClient();
 export const publicApi = {
   // Room endpoints - PUBLIC (only available rooms)
   rooms: {
-    getAll: () => apiClient.get('/rooms'), // ✅ Returns only available rooms
-    getById: (id: string) => apiClient.get(`/rooms/${id}`), // ✅ Returns only if available
+    getAll: () => apiClient.get('/rooms'),
+    getById: (id: string) => apiClient.get(`/rooms/${id}`),
     
     // Room Availability endpoints
     getAvailability: async (roomId: string, startDate?: string): Promise<ApiResponse<RoomAvailabilityResponse>> => {
@@ -255,7 +258,6 @@ export const publicApi = {
       
       console.log('🔍 checkDateAvailability raw response:', response);
       
-      // Extract the nested data structure from backend
       if (response.success && response.data?.data) {
         return {
           success: true,
@@ -263,7 +265,6 @@ export const publicApi = {
         };
       }
       
-      // If data is already at top level
       if (response.success && response.data?.available !== undefined) {
         return {
           success: true,
@@ -279,6 +280,11 @@ export const publicApi = {
   bookings: {
     create: (data: any) => apiClient.post('/bookings', data),
     getMyBookings: () => apiClient.get('/bookings/my-bookings'),
+  },
+
+  // Menu endpoints - PUBLIC
+  menu: {
+    get: () => apiClient.get('/menu'),
   },
 
   // Gallery endpoints
@@ -359,8 +365,8 @@ export const api = {
 
   // Room endpoints - ADMIN (all rooms including unavailable)
   rooms: {
-    getAll: () => apiClient.get('/rooms/admin/all'), // ✅ Changed to /rooms/admin/all
-    getById: (id: string) => apiClient.get(`/rooms/admin/${id}`), // ✅ Changed to /rooms/admin/:id
+    getAll: () => apiClient.get('/rooms/admin/all'),
+    getById: (id: string) => apiClient.get(`/rooms/admin/${id}`),
     create: (data: any) => apiClient.post('/rooms', data),
     update: (id: string, data: any) => apiClient.put(`/rooms/${id}`, data),
     delete: (id: string) => apiClient.delete(`/rooms/${id}`),
@@ -384,7 +390,6 @@ export const api = {
       
       console.log('🔍 checkDateAvailability raw response:', response);
       
-      // Extract the nested data structure from backend
       if (response.success && response.data?.data) {
         return {
           success: true,
@@ -392,7 +397,6 @@ export const api = {
         };
       }
       
-      // If data is already at top level
       if (response.success && response.data?.available !== undefined) {
         return {
           success: true,
@@ -412,6 +416,31 @@ export const api = {
     update: (id: string, data: any) => apiClient.put(`/bookings/${id}`, data),
     cancel: (id: string, data?: any) => apiClient.patch(`/bookings/${id}/cancel`, data),
     getMyBookings: () => apiClient.get('/bookings/my-bookings'),
+  },
+
+  // Menu endpoints - ADMIN
+  menu: {
+    // Get menu (uses public endpoint)
+    get: () => apiClient.get('/menu'),
+    
+    // Update entire menu (admin only)
+    update: (categories: any[]) => apiClient.put('/admin/menu', { categories }),
+    
+    // Add new category (admin only) - For future expansion beyond 3 categories
+    addCategory: (categoryData: { category: string; items: any[]; order: number }) => 
+      apiClient.post('/admin/menu/category', categoryData),
+    
+    // Delete category (admin only)
+    deleteCategory: (categoryId: string) => 
+      apiClient.delete(`/admin/menu/category/${categoryId}`),
+    
+    // Add item to specific category (admin only)
+    addMenuItem: (itemData: { categoryName: string; itemName: string; itemDescription?: string }) =>
+      apiClient.post('/admin/menu/item', itemData),
+    
+    // Delete item from specific category (admin only)
+    deleteMenuItem: (itemData: { categoryName: string; itemName: string }) =>
+      apiClient.delete('/admin/menu/item', itemData),
   },
 
   // Gallery endpoints
