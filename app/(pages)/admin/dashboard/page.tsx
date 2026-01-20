@@ -1,18 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Loader } from 'lucide-react';
+import { Booking, Room, TabType } from '@/app/types/admin';
 import { api } from '@/lib/api-clients';
-import { Room, Booking, TabType } from '@/app/types/admin';
+import { Loader } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 // Import all components
 import AdminHeader from '@/components/admin/AdminHeader';
-import NotificationBanner from '@/components/admin/NotificationBanner';
-import TabNavigation from '@/components/admin/TabNavigation';
-import RoomsTab from '@/components/admin/RoomsTab';
 import BookingsTab from '@/components/admin/BookingsTab';
-import PhotosTab from '@/components/admin/PhotosTab';
 import MenuTab from '@/components/admin/MenuTab';
+import NotificationBanner from '@/components/admin/NotificationBanner';
+import PhotosTab from '@/components/admin/PhotosTab';
+import RoomsTab from '@/components/admin/RoomsTab';
+import TabNavigation from '@/components/admin/TabNavigation';
 import RoomEditModal from '@/components/RoomEditModal';
 
 export default function AdminDashboard() {
@@ -204,18 +204,27 @@ export default function AdminDashboard() {
     }
   };
 
+  // ✅ FIXED: Now using proper delete API instead of just updating status
   const handleDeleteBooking = async (bookingId: string) => {
-    if (!confirm('Delete this booking permanently?')) return;
+    if (!confirm('⚠️ Delete this booking permanently? This action cannot be undone.')) return;
     try {
       setLoading(true);
-      const response = await api.bookings.update(bookingId, { status: 'cancelled' });
+      console.log('🗑️ Deleting booking:', bookingId);
+      
+      const response = await api.bookings.delete(bookingId);
+      
+      console.log('📥 Delete response:', response);
+      
       if (!response.success) {
         throw new Error(response.error || 'Failed to delete booking');
       }
+      
+      // Remove from local state immediately
       setBookings(prev => prev.filter(b => b._id !== bookingId));
-      showSuccess('Booking deleted!');
+      showSuccess('✅ Booking deleted permanently!');
     } catch (err: any) {
-      alert(err.message || 'Failed');
+      console.error('❌ Delete booking error:', err);
+      alert(err.message || 'Failed to delete booking');
     } finally {
       setLoading(false);
     }

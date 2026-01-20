@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Loader, RefreshCw, Image as ImageIcon } from 'lucide-react';
 import { GalleryImage } from '@/app/types/admin';
+import { Image as ImageIcon, Loader, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 interface PhotosTabProps {
   onSuccess: (message: string) => void;
@@ -224,7 +224,7 @@ export default function PhotosTab({ onSuccess, onError }: PhotosTabProps) {
           <p className="text-gray-500">No images</p>
         </div>
       ) : (
-        <div className="grid grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {filteredImages.map((image) => (
             <div key={image.id} className="bg-white rounded-lg shadow border group">
               <div className="relative h-48">

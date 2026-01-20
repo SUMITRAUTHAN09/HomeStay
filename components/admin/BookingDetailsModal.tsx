@@ -1,6 +1,5 @@
-import React from 'react';
-import { X } from 'lucide-react';
 import { Booking } from '@/app/types/admin';
+import { X } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 
 interface BookingDetailsModalProps {

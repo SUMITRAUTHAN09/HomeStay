@@ -1,6 +1,5 @@
-import React from 'react';
-import { Calendar, Home, Image, Utensils } from 'lucide-react';
 import { TabType } from '@/app/types/admin';
+import { Calendar, Home, Image, Utensils } from 'lucide-react';
 
 interface TabNavigationProps {
   activeTab: TabType;
@@ -16,9 +15,9 @@ export default function TabNavigation({ activeTab, onTabChange }: TabNavigationP
   ];
 
   return (
-    <div className="bg-white border-b">
-      <div className="max-w-7xl mx-auto px-4">
-        <nav className="flex gap-8">
+    <div className=" bg-white border-b">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4">
+        <nav className="flex gap-2 sm:gap-8 overflow-x-auto sm:overflow-visible ehitespace-nowrap scrollbar-hide">
           {tabs.map(tab => (
             <button 
               key={tab.id} 
@@ -30,7 +29,9 @@ export default function TabNavigation({ activeTab, onTabChange }: TabNavigationP
               }`}
             >
               <tab.icon size={18} />
-              {tab.label}
+
+              <span className="hidden xs:inline sm:inline">
+              {tab.label}</span>
             </button>
           ))}
         </nav>

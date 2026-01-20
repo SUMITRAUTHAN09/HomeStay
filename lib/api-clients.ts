@@ -408,13 +408,14 @@ export const api = {
     },
   },
 
-  // Booking endpoints
+  // Booking endpoints - ✅ FIXED: Added proper delete method
   bookings: {
     getAll: () => apiClient.get('/bookings'),
     getById: (id: string) => apiClient.get(`/bookings/${id}`),
     create: (data: any) => apiClient.post('/bookings', data),
     update: (id: string, data: any) => apiClient.put(`/bookings/${id}`, data),
     cancel: (id: string, data?: any) => apiClient.patch(`/bookings/${id}/cancel`, data),
+    delete: (id: string) => apiClient.delete(`/bookings/${id}`), // ✅ ADDED: Proper delete endpoint
     getMyBookings: () => apiClient.get('/bookings/my-bookings'),
   },
 
@@ -466,9 +467,7 @@ export const api = {
 export default apiClient;
 
 // Export types for use in components
-export type { 
-  ApiResponse, 
-  AvailabilityDay, 
-  RoomAvailabilityResponse, 
-  DateAvailabilityResponse 
+export type {
+  ApiResponse,
+  AvailabilityDay, DateAvailabilityResponse, RoomAvailabilityResponse
 };

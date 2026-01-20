@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Search, Eye, XCircle, Trash2, Calendar } from 'lucide-react';
 import { Booking } from '@/app/types/admin';
-import StatusBadge from './StatusBadge';
+import { Calendar, Eye, Search, Trash2, XCircle } from 'lucide-react';
+import { useState } from 'react';
 import BookingDetailsModal from './BookingDetailsModal';
+import StatusBadge from './StatusBadge';
 
 interface BookingsTabProps {
   bookings: Booking[];
@@ -99,7 +99,7 @@ export default function BookingsTab({
                   </td>
                   <td className="px-6 py-4">
                     <p className="font-semibold">₹{booking.totalPrice.toLocaleString()}</p>
-                    <p className="text-sm text-gray-600 capitalize">{booking.paymentStatus}</p>
+                    {/* ✅ REMOVED: Payment status line that was showing "pending" */}
                   </td>
                   <td className="px-6 py-4">
                     <StatusBadge status={booking.status} />
@@ -109,6 +109,7 @@ export default function BookingsTab({
                       <button 
                         onClick={() => setSelectedBooking(booking)} 
                         className="p-1 hover:bg-gray-100 rounded"
+                        title="View Details"
                       >
                         <Eye size={16} className="text-gray-600" />
                       </button>
@@ -119,6 +120,7 @@ export default function BookingsTab({
                             onChange={(e) => onUpdateStatus(booking._id, e.target.value)}
                             className="text-sm px-2 py-1 border rounded" 
                             disabled={loading}
+                            title="Change Status"
                           >
                             <option value="pending">Pending</option>
                             <option value="confirmed">Confirmed</option>
@@ -128,6 +130,7 @@ export default function BookingsTab({
                             onClick={() => onCancel(booking._id)}
                             className="p-1 hover:bg-yellow-50 rounded" 
                             disabled={loading}
+                            title="Cancel Booking"
                           >
                             <XCircle size={16} className="text-yellow-600" />
                           </button>
@@ -137,6 +140,7 @@ export default function BookingsTab({
                         onClick={() => onDelete(booking._id)}
                         className="p-1 hover:bg-red-50 rounded" 
                         disabled={loading}
+                        title="Delete Booking"
                       >
                         <Trash2 size={16} className="text-red-600" />
                       </button>
