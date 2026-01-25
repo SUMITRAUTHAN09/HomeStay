@@ -20,6 +20,7 @@ export interface RoomsResponse {
     rooms?: Room[];
   } | Room[];
   error?: string;
+  message?: string;
 }
 
 export interface BookingResponse {
@@ -33,33 +34,36 @@ export interface BookingResponse {
     checkIn: string;
     checkOut: string;
     guests: number;
+    children: number;
     numberOfRooms: number;
     totalPrice: number;
     status: string;
+    guestName: string;
+    guestPhone: string;
   };
 }
 
-/* 🔹 Booking Form Values */
+/* 🔹 Booking Form Values (Frontend) */
 export interface BookingFormValues {
   checkIn: string;
   checkOut: string;
   guests: number;
   children: number;
-  numberOfRooms: number; // ✅ Required field
+  numberOfRooms: number;
   name: string;
   phone: string;
   roomId: string;
   specialRequests: string;
 }
 
-/* 🔹 Booking Data for API (matches backend schema) */
+/* 🔹 Booking Data for API Submission (matches backend schema exactly) */
 export interface BookingData {
   room: string;                    // Backend expects 'room', not 'roomId'
   checkIn: string;
   checkOut: string;
   guests: number;
   children: number;
-  numberOfRooms: number;            // ✅ Must be included
+  numberOfRooms: number;
   adults: number;
   guestName: string;
   guestEmail: string;
@@ -95,4 +99,52 @@ export interface AvailabilityCheckResponse {
     checkOut: string;
     bookingReference: string;
   };
+}
+
+/* 🔹 Room Capacity Constants */
+export const ROOM_CAPACITY = {
+  "Family Suite": 9,
+  "Deluxe Mountain View": 6,
+  "Cozy Mountain Cabin": 3,
+} as const;
+
+export const MAX_ROOMS_PER_TYPE = {
+  "Family Suite": 3,
+  "Deluxe Mountain View": 2,
+  "Cozy Mountain Cabin": 1,
+} as const;
+
+/* 🔹 Booking for Display/Admin */
+export interface Booking {
+  _id: string;
+  room: Room | string;
+  checkIn: Date | string;
+  checkOut: Date | string;
+  guests: number;
+  children: number;
+  numberOfRooms: number;
+  adults?: number;
+  totalPrice: number;
+  pricePerNight: number;
+  taxAmount: number;
+  discountAmount: number;
+  status: "pending" | "confirmed" | "cancelled" | "completed";
+  paymentStatus: "pending" | "paid" | "refunded";
+  paymentMethod?: "cash" | "card" | "upi" | "online";
+  guestName: string;
+  guestEmail: string;
+  guestPhone: string;
+  bookingReference: string;
+  nights: number;
+  specialRequests?: string;
+  cancellationReason?: string;
+  cancelledAt?: Date | string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+/* 🔹 Date Validation Result */
+export interface DateValidationResult {
+  isValid: boolean;
+  error?: string;
 }

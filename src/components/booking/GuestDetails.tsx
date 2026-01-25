@@ -1,48 +1,162 @@
 "use client";
 
 import Typography from "@/components/layout/Typography";
-import { BookingFormValues } from "@/types/booking";
+import { BookingFormValues, Room } from "@/types/booking";
 import { ErrorMessage, Field, useFormikContext } from "formik";
+import { ROOM_CAPACITY, MAX_ROOMS_PER_TYPE, CAPACITY_PER_ROOM } from "@/validators/booking";
+import { useEffect, useRef } from "react";
 
-const GuestDetails = () => {
-  const { values, setFieldValue } = useFormikContext<BookingFormValues>();
+interface GuestDetailsProps {
+  rooms: Room[];
+}
 
-  // ✅ Auto-calculate number of rooms based on guests (3 guests per room)
-  const calculateRooms = (guests: number): number => {
+const GuestDetails = ({ rooms }: GuestDetailsProps) => {
+  const { values, setFieldValue, setFieldTouched, errors, touched } = useFormikContext<BookingFormValues>();
+  
+  // 🔹 Track if user manually changed the room count
+  const isManualRoomChange = useRef(false);
+  const previousGuests = useRef(values.guests);
+  const previousRoomType = useRef("");
+
+  // Get selected room details
+  const selectedRoom = rooms.find(room => room._id === values.roomId);
+  const roomType = selectedRoom?.name || "";
+  
+  // Get capacity limits for selected room type
+  const maxGuestsForRoom = (ROOM_CAPACITY as any)[roomType] || 9;
+  const maxRoomsForType = (MAX_ROOMS_PER_TYPE as any)[roomType] || 6;
+  const capacityPerRoom = (CAPACITY_PER_ROOM as any)[roomType] || 3;
+
+  // 🔹 Calculate recommended rooms based on guests (3 guests per room for ALL room types)
+  const calculateRecommendedRooms = (guests: number, roomType: string): number => {
     if (guests <= 0) return 1;
-    return Math.min(Math.ceil(guests / 3), 6); // Max 6 rooms
+    
+    // All rooms have 3 guests capacity each
+    const capacityPerRoom = 3;
+    const maxRooms = (MAX_ROOMS_PER_TYPE as any)[roomType] || 6;
+    
+    const recommended = Math.ceil(guests / capacityPerRoom);
+    return Math.min(recommended, maxRooms);
   };
+
+  // 🔹 Auto-adjust rooms ONLY when guests or room type changes AND user hasn't manually set it
+  useEffect(() => {
+    const guestsChanged = previousGuests.current !== values.guests;
+    const roomTypeChanged = previousRoomType.current !== roomType;
+    
+    console.log('🔄 useEffect check:', {
+      guestsChanged,
+      roomTypeChanged,
+      isManual: isManualRoomChange.current,
+      currentRooms: values.numberOfRooms,
+      guests: values.guests
+    });
+    
+    // Only auto-calculate if:
+    // 1. User hasn't manually changed rooms, OR
+    // 2. Guests count changed, OR
+    // 3. Room type changed
+    if (values.guests > 0 && roomType && (guestsChanged || roomTypeChanged)) {
+      const recommended = calculateRecommendedRooms(values.guests, roomType);
+      
+      // Reset manual flag when guests or room type changes
+      if (guestsChanged || roomTypeChanged) {
+        console.log('🔄 Resetting manual flag due to guest/room type change');
+        isManualRoomChange.current = false;
+      }
+      
+      // Only update if not manually changed
+      if (!isManualRoomChange.current) {
+        console.log('✅ Auto-setting rooms to:', recommended);
+        setFieldValue('numberOfRooms', recommended);
+      } else {
+        console.log('⏭️ Skipping auto-calculation (manual override active)');
+      }
+      
+      previousGuests.current = values.guests;
+      previousRoomType.current = roomType;
+    }
+  }, [values.guests, roomType, setFieldValue]);
 
   const handleGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, '');
     const newGuests = value === '' ? 0 : parseInt(value);
+    
+    // Validate against room type capacity
+    if (newGuests > maxGuestsForRoom) {
+      setFieldValue('guests', maxGuestsForRoom);
+      setFieldTouched('guests', true);
+      return;
+    }
+    
     setFieldValue('guests', newGuests);
     
-    // Auto-adjust children if needed
+    // Auto-adjust children if exceeds new guest count
     if (values.children > newGuests) {
       setFieldValue('children', newGuests);
     }
+    
+    // Mark as NOT manual change when guests change (allow auto-calculation)
+    isManualRoomChange.current = false;
+  };
 
-    // ✅ Auto-calculate rooms
-    const calculatedRooms = calculateRooms(newGuests);
-    setFieldValue('numberOfRooms', calculatedRooms);
+  const handleGuestsBlur = () => {
+    setFieldTouched('guests', true);
   };
 
   const handleChildrenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, '');
     const newChildren = value === '' ? 0 : parseInt(value);
-    if (newChildren <= values.guests) {
-      setFieldValue('children', newChildren);
-    }
+    
+    // Allow the input but field will show error
+    setFieldValue('children', newChildren);
+  };
+
+  const handleChildrenBlur = () => {
+    setFieldTouched('children', true);
   };
 
   const handleRoomsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // 🔹 FIRST: Mark as manual BEFORE any value changes
+    isManualRoomChange.current = true;
+    
     const value = e.target.value.replace(/\D/g, '');
-    const newRooms = value === '' ? 1 : Math.min(parseInt(value), 6);
+    
+    // Handle empty input
+    if (value === '') {
+      setFieldValue('numberOfRooms', '');
+      return;
+    }
+    
+    let newRooms = parseInt(value);
+    
+    // Enforce max rooms for room type
+    newRooms = Math.min(newRooms, maxRoomsForType);
+    newRooms = Math.max(newRooms, 1); // Minimum 1 room
+    
+    console.log('🏠 User manually set rooms to:', newRooms);
     setFieldValue('numberOfRooms', newRooms);
   };
 
+  const handleRoomsBlur = () => {
+    setFieldTouched('numberOfRooms', true);
+  };
+
+  const handleRoomsFocus = () => {
+    // 🔹 When user clicks/focuses on room field, mark as manual
+    isManualRoomChange.current = true;
+  };
+
   const adults = values.guests - values.children;
+
+  // Word count for special requests
+  const wordCount = values.specialRequests ? values.specialRequests.trim().split(/\s+/).filter(Boolean).length : 0;
+  const wordsRemaining = 30 - wordCount;
+
+  // Only show error if field has been touched AND has an error
+  const showGuestsError = touched.guests && errors.guests;
+  const showChildrenError = touched.children && errors.children;
+  const showRoomsError = touched.numberOfRooms && errors.numberOfRooms;
 
   return (
     <div className="space-y-5">
@@ -60,20 +174,28 @@ const GuestDetails = () => {
             value={values.guests || ''}
             placeholder="e.g. 5"
             onChange={handleGuestsChange}
-            className="w-full px-4 py-3 rounded-xl bg-[#F5EFE7] border border-[#C9A177]/40 focus:border-[#7570BC] focus:ring-2 focus:ring-[#7570BC]/20 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            onBlur={handleGuestsBlur}
+            className={`w-full px-4 py-3 rounded-xl bg-[#F5EFE7] border ${
+              showGuestsError
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-200' 
+                : 'border-[#C9A177]/40 focus:border-[#7570BC] focus:ring-[#7570BC]/20'
+            } focus:ring-2 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
           />
-          <ErrorMessage name="guests">
-            {(msg) => (
-              <Typography variant="small" textColor="primary" className="mt-1 text-red-600">
-                {msg}
-              </Typography>
-            )}
-          </ErrorMessage>
+          {showGuestsError && (
+            <Typography variant="small" textColor="primary" className="mt-1 text-red-600 flex items-center gap-1">
+              <span className="text-red-600">⚠️</span> {errors.guests}
+            </Typography>
+          )}
+          {roomType && !showGuestsError && values.guests > 0 && (
+            <Typography variant="small" textColor="primary" className="mt-1 text-gray-500 text-xs">
+              Max {maxGuestsForRoom} for {roomType}
+            </Typography>
+          )}
         </div>
 
         <div>
           <Typography variant="label" textColor="primary" className="mb-2 block">
-            Children *
+            Children <span className="text-gray-400 text-sm">(Optional)</span>
           </Typography>
           <input
             type="text"
@@ -83,18 +205,20 @@ const GuestDetails = () => {
             value={values.children || ''}
             placeholder="e.g. 2"
             onChange={handleChildrenChange}
-            className="w-full px-4 py-3 rounded-xl bg-[#F5EFE7] border border-[#C9A177]/40 focus:border-[#7570BC] focus:ring-2 focus:ring-[#7570BC]/20 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            onBlur={handleChildrenBlur}
+            className={`w-full px-4 py-3 rounded-xl bg-[#F5EFE7] border ${
+              showChildrenError
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-200' 
+                : 'border-[#C9A177]/40 focus:border-[#7570BC] focus:ring-[#7570BC]/20'
+            } focus:ring-2 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
           />
-          <ErrorMessage name="children">
-            {(msg) => (
-              <Typography variant="small" textColor="primary" className="mt-1 text-red-600">
-                {msg}
-              </Typography>
-            )}
-          </ErrorMessage>
+          {showChildrenError && (
+            <Typography variant="small" textColor="primary" className="mt-1 text-red-600 flex items-center gap-1">
+              <span className="text-red-600">⚠️</span> {errors.children}
+            </Typography>
+          )}
         </div>
 
-        {/* ✅ NEW: Number of Rooms Field */}
         <div>
           <Typography variant="label" textColor="primary" className="mb-2 block">
             Rooms *
@@ -107,20 +231,25 @@ const GuestDetails = () => {
             value={values.numberOfRooms || ''}
             placeholder="e.g. 2"
             onChange={handleRoomsChange}
-            max={6}
-            className="w-full px-4 py-3 rounded-xl bg-[#F5EFE7] border border-[#C9A177]/40 focus:border-[#7570BC] focus:ring-2 focus:ring-[#7570BC]/20 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            onBlur={handleRoomsBlur}
+            onFocus={handleRoomsFocus}
+            max={maxRoomsForType}
+            className={`w-full px-4 py-3 rounded-xl bg-[#F5EFE7] border ${
+              showRoomsError
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-200' 
+                : 'border-[#C9A177]/40 focus:border-[#7570BC] focus:ring-[#7570BC]/20'
+            } focus:ring-2 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
           />
-          <ErrorMessage name="numberOfRooms">
-            {(msg) => (
-              <Typography variant="small" textColor="primary" className="mt-1 text-red-600">
-                {msg}
-              </Typography>
-            )}
-          </ErrorMessage>
-          {/* ✅ Helper text */}
-          <Typography variant="small" textColor="primary" className="mt-1 text-gray-500 text-xs">
-            Max 6 rooms (auto-calculated: ~3 guests/room)
-          </Typography>
+          {showRoomsError && (
+            <Typography variant="small" textColor="primary" className="mt-1 text-red-600 flex items-center gap-1">
+              <span className="text-red-600">⚠️</span> {errors.numberOfRooms}
+            </Typography>
+          )}
+          {roomType && !showRoomsError && values.numberOfRooms > 0 && (
+            <Typography variant="small" textColor="primary" className="mt-1 text-gray-500 text-xs">
+              💡 Min {Math.ceil(values.guests / 3)} room(s) for {values.guests} guests. Max {maxRoomsForType}
+            </Typography>
+          )}
         </div>
       </div>
 
@@ -137,7 +266,7 @@ const GuestDetails = () => {
               </Typography>
             </div>
             <div className="text-right">
-              <Typography varient='paragraph' className="text-3xl font-bold text-blue-600">{values.guests}</Typography>
+              <Typography variant="paragraph" className="text-3xl font-bold text-blue-600">{values.guests}</Typography>
               <Typography variant="small" textColor="primary" className="text-xs text-gray-500">
                 Total Guests
               </Typography>
@@ -156,12 +285,16 @@ const GuestDetails = () => {
             type="text"
             name="name"
             placeholder="Enter your full name"
-            className="w-full px-4 py-3 rounded-xl bg-[#F5EFE7] border border-[#C9A177]/40 focus:border-[#7570BC] focus:ring-2 focus:ring-[#7570BC]/20 outline-none transition"
+            className={`w-full px-4 py-3 rounded-xl bg-[#F5EFE7] border ${
+              errors.name && touched.name 
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-200' 
+                : 'border-[#C9A177]/40 focus:border-[#7570BC] focus:ring-[#7570BC]/20'
+            } focus:ring-2 outline-none transition`}
           />
           <ErrorMessage name="name">
             {(msg) => (
-              <Typography variant="small" textColor="primary" className="mt-1 text-red-600">
-                {msg}
+              <Typography variant="small" textColor="primary" className="mt-1 text-red-600 flex items-center gap-1">
+                <span className="text-red-600">⚠️</span> {msg}
               </Typography>
             )}
           </ErrorMessage>
@@ -175,16 +308,54 @@ const GuestDetails = () => {
             type="tel"
             name="phone"
             placeholder="+91 98765 43210"
-            className="w-full px-4 py-3 rounded-xl bg-[#F5EFE7] border border-[#C9A177]/40 focus:border-[#7570BC] focus:ring-2 focus:ring-[#7570BC]/20 outline-none transition"
+            maxLength={10}
+            className={`w-full px-4 py-3 rounded-xl bg-[#F5EFE7] border ${
+              errors.phone && touched.phone 
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-200' 
+                : 'border-[#C9A177]/40 focus:border-[#7570BC] focus:ring-[#7570BC]/20'
+            } focus:ring-2 outline-none transition`}
           />
           <ErrorMessage name="phone">
             {(msg) => (
-              <Typography variant="small" textColor="primary" className="mt-1 text-red-600">
-                {msg}
+              <Typography variant="small" textColor="primary" className="mt-1 text-red-600 flex items-center gap-1">
+                <span className="text-red-600">⚠️</span> {msg}
               </Typography>
             )}
           </ErrorMessage>
         </div>
+      </div>
+
+      {/* Special Requests with Word Counter */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <Typography variant="label" textColor="primary" className="font-medium text-gray-700">
+            Special Requests <span className="text-gray-400 text-sm">(Optional)</span>
+          </Typography>
+          <Typography variant="small" textColor="primary" className={`text-xs ${
+            wordsRemaining < 0 ? 'text-red-600 font-semibold' : 
+            wordsRemaining <= 5 ? 'text-orange-500' : 'text-gray-500'
+          }`}>
+            {wordsRemaining < 0 ? `${Math.abs(wordsRemaining)} words over limit` : `${wordsRemaining} words remaining`}
+          </Typography>
+        </div>
+        <Field
+          as="textarea"
+          name="specialRequests"
+          rows={3}
+          placeholder="Any dietary requirements, accessibility needs, or special occasions... (max 30 words)"
+          className={`w-full px-4 py-3 rounded-xl border-2 ${
+            errors.specialRequests && touched.specialRequests
+              ? 'border-red-500 focus:border-red-500 focus:ring-red-200'
+              : 'border-gray-200 focus:border-blue-500 focus:ring-blue-100'
+          } focus:ring-4 outline-none transition-all resize-none text-gray-700 placeholder:text-gray-400`}
+        />
+        <ErrorMessage name="specialRequests">
+          {(msg) => (
+            <Typography variant="small" textColor="primary" className="mt-1 text-red-600 flex items-center gap-1">
+              <span className="text-red-600">⚠️</span> {msg}
+            </Typography>
+          )}
+        </ErrorMessage>
       </div>
     </div>
   );

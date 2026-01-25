@@ -104,28 +104,12 @@ const BookingForm = () => {
                       />
                     </div>
 
-                    {/* Guest Details - Modern Grid */}
+                    {/* Guest Details - Pass rooms prop */}
                     <div>
                       <div className="flex items-center gap-2 mb-4">
                         <Typography varient='h3' className="font-semibold text-gray-900">Guest Information</Typography>
                       </div>
-                      <GuestDetails />
-                    </div>
-
-                    {/* Special Requests - Compact */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <Typography varient='label' className="font-medium text-gray-700">
-                          Special Requests <span className="text-gray-400 text-sm">(Optional)</span>
-                        </Typography >
-                      </div>
-                      <Field
-                        as="textarea"
-                        name="specialRequests"
-                        rows={3}
-                        placeholder="Any dietary requirements, accessibility needs, or special occasions..."
-                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all resize-none text-gray-700 placeholder:text-gray-400"
-                      />
+                      <GuestDetails rooms={rooms} />
                     </div>
 
                     {/* Submit Button - Eye-catching */}

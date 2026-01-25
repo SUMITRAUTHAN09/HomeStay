@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Typography from "@/components/layout/Typography";
 import { publicApi } from '@/lib/api-client';
+import { MAX_ROOMS_PER_TYPE } from '@/types/booking';
 
 interface RoomImageCarouselProps {
   images: string[];
@@ -111,6 +112,12 @@ function RoomImageCarousel({ images, roomName }: RoomImageCarouselProps) {
   );
 }
 
+// Helper function to get available rooms count
+const getAvailableRoomsCount = (roomName: string): number => {
+  const roomType = roomName as keyof typeof MAX_ROOMS_PER_TYPE;
+  return MAX_ROOMS_PER_TYPE[roomType] || 1;
+};
+
 const Rooms = () => {
   const [rooms, setRooms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -125,7 +132,6 @@ const Rooms = () => {
       setLoading(true);
       console.log('🔍 Fetching available rooms from public API...');
       
-      // ✅ Changed to publicApi - only fetches available rooms
       const response = await publicApi.rooms.getAll();
       
       console.log('📥 API Response:', response);
@@ -147,20 +153,16 @@ const Rooms = () => {
     }
   };
 
-  // ✅ Function to handle booking with pre-selected room
   const handleBookRoom = (roomId: string, e: React.MouseEvent) => {
     e.preventDefault();
     
-    // Store selected room ID in sessionStorage
     sessionStorage.setItem('selectedRoomId', roomId);
     
-    // Scroll to booking section
     const bookingSection = document.getElementById('booking');
     if (bookingSection) {
       bookingSection.scrollIntoView({ behavior: 'smooth' });
     }
     
-    // Dispatch custom event to notify BookingForm
     window.dispatchEvent(new CustomEvent('roomSelected', { detail: { roomId } }));
   };
 
@@ -227,89 +229,105 @@ const Rooms = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {rooms.map((room) => (
-              <div
-                key={room._id}
-                className="group relative bg-white rounded-2xl overflow-hidden transition-all duration-300 shadow-lg hover:sm:scale-105"
-              >
-                {/* Image Carousel Component */}
-                <RoomImageCarousel 
-                  images={room.images || []} 
-                  roomName={room.name} 
-                />
+            {rooms.map((room) => {
+              const availableRoomsCount = getAvailableRoomsCount(room.name);
+              
+              return (
+                <div
+                  key={room._id}
+                  className="group relative bg-white rounded-2xl overflow-hidden transition-all duration-300 shadow-lg hover:sm:scale-105"
+                >
+                  {/* Image Carousel Component */}
+                  <RoomImageCarousel 
+                    images={room.images || []} 
+                    roomName={room.name} 
+                  />
 
-                {/* Capacity Badge */}
-                <div className="absolute top-4 right-4 bg-[#7570BC] text-white px-3 py-1 rounded-full z-10">
-                  <Typography
-                    variant="small"
-                    textColor="white"
-                    weight="semibold"
-                  >
-                    Up to {room.capacity} Guests
-                  </Typography>
-                </div>
+                  {/* Capacity Badge */}
+                  <div className="absolute top-4 right-4 bg-[#7570BC] text-white px-3 py-1 rounded-full z-10">
+                    <Typography
+                      variant="small"
+                      textColor="white"
+                      weight="semibold"
+                    >
+                      Up to {room.capacity} Guests
+                    </Typography>
+                  </div>
 
-                <div className="p-5 sm:p-6">
-                  <Typography
-                    variant="h4"
-                    textColor="primary"
-                    weight="bold"
-                    className="mb-4"
-                  >
-                    {room.name}
-                  </Typography>
+                  <div className="p-5 sm:p-6">
+                    <Typography
+                      variant="h4"
+                      textColor="primary"
+                      weight="bold"
+                      className="mb-4"
+                    >
+                      {room.name}
+                    </Typography>
 
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    {(room.features || room.amenities || []).slice(0, 4).map((feature: string, i: number) => (
-                      <div key={i} className="flex items-center gap-1">
-                        <div className="w-1.5 h-1.5 bg-[#7570BC] rounded-full" />
-                        <Typography variant="small" textColor="secondary">
-                          {feature}
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                      {(room.features || room.amenities || []).slice(0, 4).map((feature: string, i: number) => (
+                        <div key={i} className="flex items-center gap-1">
+                          <div className="w-1.5 h-1.5 bg-[#7570BC] rounded-full" />
+                          <Typography variant="small" textColor="secondary">
+                            {feature}
+                          </Typography>
+                        </div>
+                      ))}
+                    </div>
+
+                    {room.description && (
+                      <Typography variant="small" textColor="secondary" className="mb-4 line-clamp-2">
+                        {room.description}
+                      </Typography>
+                    )}
+
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-[#BFC7DE]">
+                      <div>
+                        <Typography
+                          variant="h3"
+                          textColor="primary"
+                          weight="bold"
+                          as="span"
+                        >
+                          ₹{room.price.toLocaleString()}
+                        </Typography>
+                        <Typography
+                          variant="muted"
+                          textColor="secondary"
+                          as="span"
+                        >
+                          {" / night"}
                         </Typography>
                       </div>
-                    ))}
-                  </div>
-
-                  {room.description && (
-                    <Typography variant="small" textColor="secondary" className="mb-4 line-clamp-2">
-                      {room.description}
-                    </Typography>
-                  )}
-
-                  <div className="flex items-center justify-between mt-6 pt-6 border-t border-[#BFC7DE]">
-                    <div>
-                      <Typography
-                        variant="h3"
-                        textColor="primary"
-                        weight="bold"
-                        as="span"
+                      <button
+                        onClick={(e) => handleBookRoom(room._id, e)}
+                        className="bg-[#734746] text-white px-5 sm:px-6 py-2 rounded-full hover:bg-[#7570BC] transition-all"
                       >
-                        ₹{room.price.toLocaleString()}
-                      </Typography>
-                      <Typography
-                        variant="muted"
-                        textColor="secondary"
-                        as="span"
-                      >
-                        {" / night"}
-                      </Typography>
+                        <Typography
+                          variant="small"
+                          textColor="white"
+                          weight="semibold"
+                        >
+                          Book
+                        </Typography>
+                      </button>
                     </div>
-                    <button
-                      onClick={(e) => handleBookRoom(room._id, e)}
-                      className="bg-[#734746] text-white px-5 sm:px-6 py-2 rounded-full hover:bg-[#7570BC] transition-all"
-                    >
-                      <Typography
-                        variant="small"
-                        textColor="white"
-                        weight="semibold"
-                      >
-                        Book
-                      </Typography>
-                    </button>
+
+                    {/* Available Rooms Count - NEW SECTION */}
+                    <div className="mt-4 pt-4 border-t border-[#BFC7DE]">
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="flex items-center gap-1">
+                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                          <Typography variant="small" textColor="secondary" weight="semibold">
+                            {availableRoomsCount} {availableRoomsCount === 1 ? 'Room' : 'Rooms'} Available
+                          </Typography>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
