@@ -5,6 +5,7 @@ export interface Room {
   type: string;
   price: number;
   capacity: number;
+  totalRooms: number; // ✅ NEW: Total number of physical rooms
   description?: string;
   amenities?: string[];
   images?: string[];
@@ -58,7 +59,7 @@ export interface BookingFormValues {
 
 /* 🔹 Booking Data for API Submission (matches backend schema exactly) */
 export interface BookingData {
-  room: string;                    // Backend expects 'room', not 'roomId'
+  room: string;
   checkIn: string;
   checkOut: string;
   guests: number;
@@ -89,16 +90,23 @@ export interface AvailabilityCheckRequest {
   excludeBookingId?: string;
 }
 
-/* 🔹 Availability Check Response */
-export interface AvailabilityCheckResponse {
-  success: boolean;
+/* 🔹 Date Availability Response - ✅ FIXED WITH NEW FIELDS */
+export interface DateAvailabilityResponse {
   available: boolean;
+  availableRooms: number;  // ✅ NEW: How many rooms are available
+  totalRooms: number;      // ✅ NEW: Total rooms of this type
+  bookedRooms: number;     // ✅ NEW: How many rooms are booked
   message?: string;
   conflictingBooking?: {
-    checkIn: string;
-    checkOut: string;
-    bookingReference: string;
-  };
+    checkIn: Date;
+    checkOut: Date;
+    status: string;
+  } | null;
+}
+
+/* 🔹 Availability Check Response - Same as DateAvailabilityResponse */
+export interface AvailabilityCheckResponse extends DateAvailabilityResponse {
+  success?: boolean;
 }
 
 /* 🔹 Room Capacity Constants */

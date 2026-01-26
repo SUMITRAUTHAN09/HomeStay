@@ -10,11 +10,12 @@ export const calculateNights = (checkIn: string, checkOut: string): number => {
   return nights;
 };
 
-/* 🔹 Check room availability for selected dates */
+/* 🔹 Check room availability for selected dates with room count */
 export const checkAvailability = async (
   roomId: string, 
   checkIn: string, 
-  checkOut: string
+  checkOut: string,
+  requestedRooms: number = 1 // ✅ NEW: How many rooms user wants to book
 ): Promise<boolean> => {
   if (!roomId || !checkIn || !checkOut) {
     console.warn('⚠️ Missing parameters for availability check');
@@ -22,12 +23,21 @@ export const checkAvailability = async (
   }
   
   try {
-    console.log('🔍 Checking availability:', { roomId, checkIn, checkOut });
+    console.log('🔍 Checking availability:', { roomId, checkIn, checkOut, requestedRooms });
     const response = await publicApi.rooms.checkDateAvailability(roomId, checkIn, checkOut);
     
     if (response.success && response.data) {
-      console.log('✅ Availability result:', response.data.available);
-      return response.data.available;
+      const availableRooms = response.data.availableRooms || 0;
+      const isEnoughRooms = availableRooms >= requestedRooms;
+      
+      console.log('✅ Availability result:', {
+        available: response.data.available,
+        availableRooms,
+        requestedRooms,
+        isEnoughRooms
+      });
+      
+      return response.data.available && isEnoughRooms;
     }
     
     console.warn('⚠️ Unexpected availability response:', response);
@@ -121,7 +131,7 @@ export const prepareBookingData = (
     taxAmount: Number(taxAmount),
     discountAmount: 0,
     paymentStatus: "pending",
-    status: "confirmed", // ✅ CHANGED: Backend expects "confirmed"
+    status: "confirmed",
     specialRequests: values.specialRequests 
       ? values.specialRequests.substring(0, 500).trim()
       : ""

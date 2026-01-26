@@ -51,8 +51,12 @@ interface RoomAvailabilityResponse {
   availability: AvailabilityDay[];
 }
 
+// ✅ FIXED: Added the three new fields
 interface DateAvailabilityResponse {
   available: boolean;
+  availableRooms: number;  // ✅ NEW
+  totalRooms: number;      // ✅ NEW
+  bookedRooms: number;     // ✅ NEW
   message: string;
   conflictingBooking?: {
     checkIn: Date;
@@ -469,5 +473,7 @@ export default apiClient;
 // Export types for use in components
 export type {
   ApiResponse,
-  AvailabilityDay, DateAvailabilityResponse, RoomAvailabilityResponse
+  AvailabilityDay, 
+  DateAvailabilityResponse, 
+  RoomAvailabilityResponse
 };

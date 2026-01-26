@@ -10,6 +10,80 @@ import GuestDetails from "./GuestDetails";
 import NotificationPopup from "./NotificationPopup";
 import RoomSelector from "./RoomSelector";
 
+// ✅ NEW: Room Availability Display Component (inline)
+const RoomAvailabilityBox = ({ 
+  availableRooms, 
+  totalRooms, 
+  roomName 
+}: { 
+  availableRooms: number; 
+  totalRooms: number; 
+  roomName: string;
+}) => {
+  const bookedRooms = totalRooms - availableRooms;
+  const availabilityPercentage = (availableRooms / totalRooms) * 100;
+
+  const getColorClass = () => {
+    if (availableRooms === 0) return 'bg-red-50 border-red-300 text-red-800';
+    if (availableRooms === 1) return 'bg-orange-50 border-orange-300 text-orange-800';
+    if (availableRooms === totalRooms) return 'bg-green-50 border-green-300 text-green-800';
+    return 'bg-yellow-50 border-yellow-300 text-yellow-800';
+  };
+
+  const getIcon = () => {
+    if (availableRooms === 0) return '❌';
+    if (availableRooms === 1) return '⚠️';
+    if (availableRooms === totalRooms) return '✅';
+    return '🏠';
+  };
+
+  const getProgressColor = () => {
+    if (availableRooms === 0) return 'bg-red-500';
+    if (availableRooms === 1) return 'bg-orange-500';
+    if (availableRooms === totalRooms) return 'bg-green-500';
+    return 'bg-yellow-500';
+  };
+
+  return (
+    <div className={`p-4 rounded-xl border-2 ${getColorClass()} shadow-md transition-all duration-300 mt-4`}>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <span className="text-3xl">{getIcon()}</span>
+          <div>
+            <h3 className="font-bold text-lg">{roomName}</h3>
+            <p className="text-sm opacity-80">Room Availability</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <div className="text-4xl font-bold">{availableRooms}</div>
+          <div className="text-xs opacity-80">of {totalRooms} rooms</div>
+        </div>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="relative w-full h-4 bg-white rounded-full overflow-hidden mb-3 shadow-inner">
+        <div
+          className={`h-full transition-all duration-500 ${getProgressColor()}`}
+          style={{ width: `${availabilityPercentage}%` }}
+        />
+      </div>
+
+      {/* Status Message */}
+      <div className="text-sm font-semibold">
+        {availableRooms === 0 ? (
+          <span>❌ No rooms available - Please select different dates</span>
+        ) : availableRooms === 1 ? (
+          <span>⚠️ Only 1 room left - Book now before it's gone!</span>
+        ) : availableRooms === totalRooms ? (
+          <span>✅ All {totalRooms} rooms available - Great choice!</span>
+        ) : (
+          <span>🏠 {bookedRooms} room{bookedRooms > 1 ? 's' : ''} already booked, {availableRooms} still available</span>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const BookingForm = () => {
   const {
     mounted,
@@ -23,6 +97,7 @@ const BookingForm = () => {
     selectedRoomId,
     isCheckingAvailability,
     calendarRefreshKey,
+    roomAvailability, // ✅ NEW
     formikRef,
     handleRoomChange,
     handleDateSelect,
@@ -30,6 +105,9 @@ const BookingForm = () => {
   } = useBookingForm();
 
   if (!mounted) return null;
+
+  // ✅ NEW: Get selected room details
+  const selectedRoom = rooms.find(room => room._id === selectedRoomId);
 
   return (
     <>
@@ -73,7 +151,6 @@ const BookingForm = () => {
                   {/* Compact Room Selection Section */}
                   <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6">
                     <div className="flex items-center gap-2 mb-3">
-                      
                       <Typography varient='h3' className="text-white font-semibold text-lg">Select Your Room</Typography>
                     </div>
                     <RoomSelector 
@@ -104,6 +181,26 @@ const BookingForm = () => {
                       />
                     </div>
 
+                    {/* ✅ NEW: Room Availability Display */}
+                    {roomAvailability && selectedRoom && values.checkIn && values.checkOut && (
+                      <RoomAvailabilityBox
+                        availableRooms={roomAvailability.availableRooms}
+                        totalRooms={roomAvailability.totalRooms}
+                        roomName={selectedRoom.name}
+                      />
+                    )}
+
+                    {/* Loading indicator while checking availability */}
+                    {isCheckingAvailability && values.checkIn && values.checkOut && (
+                      <div className="p-4 bg-blue-50 rounded-xl border-2 border-blue-200 flex items-center gap-3">
+                        <svg className="animate-spin h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span className="text-blue-800 font-medium">Checking room availability...</span>
+                      </div>
+                    )}
+
                     {/* Guest Details - Pass rooms prop */}
                     <div>
                       <div className="flex items-center gap-2 mb-4">
@@ -115,7 +212,7 @@ const BookingForm = () => {
                     {/* Submit Button - Eye-catching */}
                     <button
                       type="submit"
-                      disabled={isSubmitting || isCheckingAvailability}
+                      disabled={isSubmitting || isCheckingAvailability || (roomAvailability?.availableRooms === 0)}
                       className={`
                         w-full bg-gradient-to-r from-blue-600 to-indigo-600 
                         hover:from-blue-700 hover:to-indigo-700
@@ -124,7 +221,7 @@ const BookingForm = () => {
                         transform hover:scale-[1.02] active:scale-[0.98]
                         transition-all duration-200
                         flex items-center justify-center gap-3
-                        ${(isSubmitting || isCheckingAvailability) ? "opacity-60 cursor-not-allowed" : ""}
+                        ${(isSubmitting || isCheckingAvailability || roomAvailability?.availableRooms === 0) ? "opacity-60 cursor-not-allowed" : ""}
                       `}
                     >
                       {isSubmitting ? (
@@ -142,6 +239,10 @@ const BookingForm = () => {
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
                           <span>Checking Availability...</span>
+                        </>
+                      ) : roomAvailability?.availableRooms === 0 ? (
+                        <>
+                          <span>❌ No Rooms Available</span>
                         </>
                       ) : (
                         <>
