@@ -1,4 +1,4 @@
-// api/calendarApi.ts
+// src/lib/calendar-api.ts
 import { AvailabilityDay } from '@/types/calendar';
 import { getApiUrl } from './calendar-utils';
 
@@ -11,7 +11,10 @@ export const fetchRoomAvailability = async (
   startDate.setDate(1);
   
   const API_URL = getApiUrl();
-  const apiUrl = `${API_URL}/api/rooms/${roomId}/availability-calendar?startDate=${startDate.toISOString()}`;
+  
+  // ✅ ADD CACHE BUSTING: Add timestamp to prevent caching
+  const timestamp = new Date().getTime();
+  const apiUrl = `${API_URL}/api/rooms/${roomId}/availability-calendar?startDate=${startDate.toISOString()}&_t=${timestamp}`;
   
   console.log('🔍 Fetching availability for room:', roomId);
   console.log('📅 Start date:', startDate.toISOString());
@@ -21,7 +24,10 @@ export const fetchRoomAvailability = async (
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache', // ✅ ADD NO-CACHE HEADER
+      'Pragma': 'no-cache', // ✅ ADD PRAGMA HEADER
     },
+    cache: 'no-store', // ✅ ADD CACHE NO-STORE
   });
 
   if (!response.ok) {
