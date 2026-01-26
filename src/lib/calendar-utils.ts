@@ -1,10 +1,10 @@
 // utils/calendar-utils.ts
 import { AvailabilityDay } from '@/types/calendar';
+import { config } from './config';
 
 export const getApiUrl = (): string => {
-  return typeof window !== 'undefined' && (window as any).ENV?.VITE_API_URL 
-    ? (window as any).ENV.VITE_API_URL 
-    : 'http://localhost:3001';
+  // Use the centralized config which reads NEXT_PUBLIC_API_URL
+  return config.api.url || 'http://localhost:3001';
 };
 
 export const isRangeAvailable = (

@@ -12,9 +12,9 @@ export const fetchRoomAvailability = async (
   
   const API_URL = getApiUrl();
   
-  // ✅ ADD CACHE BUSTING: Add timestamp to prevent caching
+  // ✅ Remove /api since it's already in the config
   const timestamp = new Date().getTime();
-  const apiUrl = `${API_URL}/api/rooms/${roomId}/availability-calendar?startDate=${startDate.toISOString()}&_t=${timestamp}`;
+  const apiUrl = `${API_URL}/rooms/${roomId}/availability-calendar?startDate=${startDate.toISOString()}&_t=${timestamp}`;
   
   console.log('🔍 Fetching availability for room:', roomId);
   console.log('📅 Start date:', startDate.toISOString());
@@ -24,10 +24,10 @@ export const fetchRoomAvailability = async (
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'Cache-Control': 'no-cache', // ✅ ADD NO-CACHE HEADER
-      'Pragma': 'no-cache', // ✅ ADD PRAGMA HEADER
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache',
     },
-    cache: 'no-store', // ✅ ADD CACHE NO-STORE
+    cache: 'no-store',
   });
 
   if (!response.ok) {
@@ -45,7 +45,6 @@ export const fetchRoomAvailability = async (
   if (data.success) {
     const availability = data.availability || [];
     
-    // Log specific dates we care about
     const jan18 = availability.find((d: any) => d.date === '2026-01-18');
     const jan19 = availability.find((d: any) => d.date === '2026-01-19');
     const jan20 = availability.find((d: any) => d.date === '2026-01-20');
@@ -54,7 +53,6 @@ export const fetchRoomAvailability = async (
     console.log('📅 Jan 19:', jan19);
     console.log('📅 Jan 20:', jan20);
     
-    // Count available vs booked
     const availableCount = availability.filter((d: any) => d.available).length;
     const bookedCount = availability.filter((d: any) => !d.available).length;
     console.log(`✅ Available days: ${availableCount}, ❌ Booked days: ${bookedCount}`);
