@@ -2,8 +2,8 @@
 
 import Typography from "@/components/layout/Typography";
 import { BookingFormValues, Room } from "@/types/booking";
+import { CAPACITY_PER_ROOM, MAX_ROOMS_PER_TYPE, ROOM_CAPACITY } from "@/validators/booking";
 import { ErrorMessage, Field, useFormikContext } from "formik";
-import { ROOM_CAPACITY, MAX_ROOMS_PER_TYPE, CAPACITY_PER_ROOM } from "@/validators/booking";
 import { useEffect, useRef } from "react";
 
 interface GuestDetailsProps {
@@ -161,10 +161,10 @@ const GuestDetails = ({ rooms }: GuestDetailsProps) => {
   return (
     <div className="space-y-5">
       {/* Guests, Children, and Rooms - Grid Layout */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-1">
         <div>
           <Typography variant="label" textColor="primary" className="mb-2 block">
-            Total Guests *
+            Total Guests*
           </Typography>
           <input
             type="text"
@@ -195,7 +195,7 @@ const GuestDetails = ({ rooms }: GuestDetailsProps) => {
 
         <div>
           <Typography variant="label" textColor="primary" className="mb-2 block">
-            Children <span className="text-gray-400 text-sm">(Optional)</span>
+            Children
           </Typography>
           <input
             type="text"
@@ -221,7 +221,7 @@ const GuestDetails = ({ rooms }: GuestDetailsProps) => {
 
         <div>
           <Typography variant="label" textColor="primary" className="mb-2 block">
-            Rooms *
+            Rooms*
           </Typography>
           <input
             type="text"
@@ -258,7 +258,7 @@ const GuestDetails = ({ rooms }: GuestDetailsProps) => {
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <Typography variant="small" textColor="primary" weight="semibold" className="text-gray-900">
+              <Typography variant="small" textColor="primary" weight="semibold" className="text-gray-900 block">
                 Booking Summary
               </Typography>
               <Typography variant="small" textColor="primary" className="text-xs text-gray-600">

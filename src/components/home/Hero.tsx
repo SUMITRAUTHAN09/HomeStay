@@ -53,7 +53,7 @@ const Hero: React.FC<HeroProps> = ({ canvasRef }) => {
          Escape the noise and step into a space where mountains, silence, and fresh air come together. A place designed to relax, slow down, and truly unwind.
         </Typography>
 
-        <div className="flex flex-col sm:flex-row gap-30 justify-center">
+        <div className="flex flex-col sm:flex-row gap-5 md:gap-35 justify-center">
           <a
             href="#booking"
             className="bg-gradient-to-r from-[#0F766E] to-[#22C55E] text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full hover:bg-[#C59594] transition-all transform hover:scale-105"
@@ -77,7 +77,7 @@ const Hero: React.FC<HeroProps> = ({ canvasRef }) => {
           </a>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-2 mt-2 sm:mt-5 max-w-2xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-2 mt-10 sm:mt-5 max-w-2xl mx-auto">
           <div className="text-center flex flex-col items-center">
             <Typography
               variant="h3"

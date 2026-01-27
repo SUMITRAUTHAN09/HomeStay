@@ -1,6 +1,5 @@
 "use client";
 
-import { MapVideo } from "@/constants";
 import {
   Carousel,
   CarouselContent,
@@ -8,6 +7,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { MapVideo } from "@/constants";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -107,38 +107,6 @@ export default function Photos() {
         {/* Photo Grid */}
       </div>
       <div className="w-full">
-        {/*      
- <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {photos.map((photo, index) => (
-          <div
-            key={photo.id}
-            className="group relative aspect-square overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105"
-            style={{
-              animation: `fadeInUp 0.5s ease-out forwards`,
-              animationDelay: `${index * 0.1}s`,
-              opacity: 0,
-            }}
-          >
-            
-            <Image
-              src={photo.url}
-              alt={photo.title || `Gallery photo ${index + 1}`}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-110"
-              sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            />
-            
-           
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-              <p className="text-white font-semibold text-sm md:text-base">
-                {photo.title || `Photo ${index + 1}`}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-*/}
-
         <div className="w-full">
           <Carousel
             opts={{
@@ -150,7 +118,7 @@ export default function Photos() {
               {photos.map((photo, index) => (
                 <CarouselItem
                   key={index}
-                  className="basis-1/2 sm:basis-1/4 lg:basis-1/4"
+                  className="basis-1/3 sm:basis-1/4 lg:basis-1/5"
                 >
                   <div className="relative aspect-square overflow-hidden rounded-xl shadow-md">
                     <Image
@@ -178,21 +146,6 @@ export default function Photos() {
             </p>
           </div>
         )}
-
-        {/* Animation Keyframes 
-      <style jsx>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
-      */}
       </div>
     </section>
   );

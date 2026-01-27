@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Typography from "@/components/layout/Typography";
 import { publicApi } from '@/lib/api-client';
 import { MAX_ROOMS_PER_TYPE } from '@/types/booking';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface RoomImageCarouselProps {
   images: string[];
@@ -211,11 +211,6 @@ const Rooms = () => {
           <Typography variant="paragraph" textColor="secondary" align="center">
             Comfortable accommodations with stunning mountain vistas
           </Typography>
-          {rooms.length > 0 && (
-            <Typography variant="small" textColor="secondary" align="center" className="mt-2">
-              {rooms.length} {rooms.length === 1 ? 'room' : 'rooms'} available
-            </Typography>
-          )}
         </div>
 
         {rooms.length === 0 ? (
