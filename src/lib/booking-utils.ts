@@ -1,5 +1,5 @@
 import { publicApi } from "@/lib/api-client";
-import { Room, RoomsResponse, BookingFormValues, BookingData } from "@/types/booking";
+import { BookingData, BookingFormValues, Room, RoomsResponse } from "@/types/booking";
 
 /* 🔹 Calculate number of nights between dates */
 export const calculateNights = (checkIn: string, checkOut: string): number => {
@@ -15,7 +15,7 @@ export const checkAvailability = async (
   roomId: string, 
   checkIn: string, 
   checkOut: string,
-  requestedRooms: number = 1 // ✅ NEW: How many rooms user wants to book
+  requestedRooms: number = 1
 ): Promise<boolean> => {
   if (!roomId || !checkIn || !checkOut) {
     console.warn('⚠️ Missing parameters for availability check');
@@ -78,7 +78,7 @@ export const fetchRooms = async (): Promise<Room[]> => {
   }
 };
 
-/* 🔹 Prepare booking data for API submission */
+/* 🔹 Prepare booking data for API submission - ONLY BASE + 18% GST */
 export const prepareBookingData = (
   values: BookingFormValues,
   selectedRoom: Room
@@ -89,10 +89,10 @@ export const prepareBookingData = (
   // Get price per night
   const pricePerNight = Number(selectedRoom.price) || 3500;
   
-  // Calculate pricing
+  // ✅ SIMPLIFIED PRICING: Base + 18% GST ONLY
   const basePrice = pricePerNight * nights * values.numberOfRooms;
-  const taxAmount = Math.round(basePrice * 0.12); // 12% tax
-  const totalPrice = basePrice + taxAmount;
+  const gstAmount = Math.round(basePrice * 0.18); // 18% GST
+  const totalPrice = basePrice + gstAmount; // No discounts
 
   // Calculate adults
   const adults = values.guests - values.children;
@@ -100,13 +100,14 @@ export const prepareBookingData = (
   // Clean phone number (remove non-digits)
   const cleanPhone = values.phone.replace(/\D/g, '');
 
-  console.log('💰 Pricing Breakdown:', {
+  console.log('💰 Pricing Breakdown (Base + 18% GST ONLY):', {
     roomName: selectedRoom.name,
     pricePerNight,
     nights,
     numberOfRooms: values.numberOfRooms,
     basePrice,
-    taxAmount,
+    gstAmount,
+    gstRate: '18%',
     totalPrice,
     guests: values.guests,
     adults,
@@ -128,8 +129,7 @@ export const prepareBookingData = (
     nights: Number(nights),
     pricePerNight: Number(pricePerNight),
     totalPrice: Number(totalPrice),
-    taxAmount: Number(taxAmount),
-    discountAmount: 0,
+    gstAmount: Number(gstAmount), // Changed from taxAmount
     paymentStatus: "pending",
     status: "confirmed",
     specialRequests: values.specialRequests 
@@ -197,4 +197,22 @@ export const formatPrice = (price: number): string => {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(price);
+};
+
+/* 🔹 Calculate pricing breakdown for display */
+export const calculatePricingBreakdown = (
+  pricePerNight: number,
+  nights: number,
+  numberOfRooms: number
+) => {
+  const basePrice = pricePerNight * nights * numberOfRooms;
+  const gstAmount = Math.round(basePrice * 0.18);
+  const totalPrice = basePrice + gstAmount;
+
+  return {
+    basePrice,
+    gstAmount,
+    gstRate: '18%',
+    totalPrice
+  };
 };

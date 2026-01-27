@@ -5,7 +5,7 @@ export interface Room {
   type: string;
   price: number;
   capacity: number;
-  totalRooms: number; // ✅ NEW: Total number of physical rooms
+  totalRooms: number; // ✅ Total number of physical rooms
   description?: string;
   amenities?: string[];
   images?: string[];
@@ -72,8 +72,7 @@ export interface BookingData {
   nights: number;
   pricePerNight: number;
   totalPrice: number;
-  taxAmount: number;
-  discountAmount: number;
+  gstAmount: number; // ✅ CHANGED from taxAmount to gstAmount (18% GST)
   paymentStatus: "pending" | "paid" | "refunded";
   status: "pending" | "confirmed" | "cancelled" | "completed";
   specialRequests: string;
@@ -134,8 +133,8 @@ export interface Booking {
   adults?: number;
   totalPrice: number;
   pricePerNight: number;
-  taxAmount: number;
-  discountAmount: number;
+  gstAmount: number; // ✅ CHANGED from taxAmount to gstAmount (18% GST)
+  discountAmount: number; // Always 0 - no discounts
   status: "pending" | "confirmed" | "cancelled" | "completed";
   paymentStatus: "pending" | "paid" | "refunded";
   paymentMethod?: "cash" | "card" | "upi" | "online";
@@ -155,4 +154,12 @@ export interface Booking {
 export interface DateValidationResult {
   isValid: boolean;
   error?: string;
+}
+
+/* 🔹 Pricing Breakdown for Display */
+export interface PricingBreakdown {
+  basePrice: number;
+  gstAmount: number;
+  gstRate: string;
+  totalPrice: number;
 }

@@ -1,10 +1,11 @@
 "use client";
 
 import Typography from "@/components/layout/Typography";
+import { calculateNights, calculatePricingBreakdown, formatPrice } from "@/lib/booking-utils";
 import { BookingFormValues, Room } from "@/types/booking";
 import { CAPACITY_PER_ROOM, MAX_ROOMS_PER_TYPE, ROOM_CAPACITY } from "@/validators/booking";
 import { ErrorMessage, Field, useFormikContext } from "formik";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface GuestDetailsProps {
   rooms: Room[];
@@ -18,6 +19,14 @@ const GuestDetails = ({ rooms }: GuestDetailsProps) => {
   const previousGuests = useRef(values.guests);
   const previousRoomType = useRef("");
 
+  // ✅ NEW: Pricing breakdown state
+  const [pricingBreakdown, setPricingBreakdown] = useState<{
+    basePrice: number;
+    gstAmount: number;
+    gstRate: string;
+    totalPrice: number;
+  } | null>(null);
+
   // Get selected room details
   const selectedRoom = rooms.find(room => room._id === values.roomId);
   const roomType = selectedRoom?.name || "";
@@ -26,6 +35,21 @@ const GuestDetails = ({ rooms }: GuestDetailsProps) => {
   const maxGuestsForRoom = (ROOM_CAPACITY as any)[roomType] || 9;
   const maxRoomsForType = (MAX_ROOMS_PER_TYPE as any)[roomType] || 6;
   const capacityPerRoom = (CAPACITY_PER_ROOM as any)[roomType] || 3;
+
+  // ✅ NEW: Calculate pricing whenever relevant values change
+  useEffect(() => {
+    if (values.roomId && values.checkIn && values.checkOut && values.numberOfRooms > 0) {
+      const selectedRoom = rooms.find(room => room._id === values.roomId);
+      if (selectedRoom) {
+        const nights = calculateNights(values.checkIn, values.checkOut);
+        const pricePerNight = Number(selectedRoom.price) || 3500;
+        const breakdown = calculatePricingBreakdown(pricePerNight, nights, values.numberOfRooms);
+        setPricingBreakdown(breakdown);
+      }
+    } else {
+      setPricingBreakdown(null);
+    }
+  }, [values.roomId, values.checkIn, values.checkOut, values.numberOfRooms, rooms]);
 
   // 🔹 Calculate recommended rooms based on guests (3 guests per room for ALL room types)
   const calculateRecommendedRooms = (guests: number, roomType: string): number => {
@@ -357,6 +381,70 @@ const GuestDetails = ({ rooms }: GuestDetailsProps) => {
           )}
         </ErrorMessage>
       </div>
+
+      {/* ✅ NEW: Pricing Breakdown Display - Base + 18% GST */}
+      {pricingBreakdown && values.checkIn && values.checkOut && (
+        <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-xl p-6 space-y-4 shadow-sm">
+          <Typography variant="h3" className="font-bold text-gray-900 flex items-center gap-2">
+            💰 Payment Summary
+          </Typography>
+          
+          <div className="space-y-3">
+            {/* Base Price */}
+            <div className="flex justify-between items-center py-2 border-b border-emerald-200">
+              <Typography variant="paragraph" className="text-gray-700">Base Amount</Typography>
+              <Typography variant="paragraph" className="font-semibold text-gray-900 text-lg">
+                {formatPrice(pricingBreakdown.basePrice)}
+              </Typography>
+            </div>
+
+            {/* GST */}
+            <div className="flex justify-between items-center py-2 border-b border-emerald-200">
+              <Typography variant="paragraph" className="text-gray-700">GST (18%)</Typography>
+              <Typography variant="paragraph" className="font-semibold text-gray-900 text-lg">
+                {formatPrice(pricingBreakdown.gstAmount)}
+              </Typography>
+            </div>
+
+            {/* Total */}
+            <div className="flex justify-between items-center py-3 bg-emerald-100 rounded-lg px-4 mt-2">
+              <Typography variant="paragraph" className="font-bold text-gray-900 text-lg">Total Amount</Typography>
+              <Typography variant="h3" className="font-bold text-emerald-600 text-2xl">
+                {formatPrice(pricingBreakdown.totalPrice)}
+              </Typography>
+            </div>
+          </div>
+
+          {/* Calculation Details */}
+          <div className="text-sm text-gray-600 bg-white bg-opacity-60 rounded-lg p-3 space-y-1">
+            <div className="flex justify-between">
+              <Typography variant="small" textColor="primary">Price per night:</Typography>
+              <Typography variant="small" textColor="primary" className="font-medium">
+                {formatPrice(pricingBreakdown.basePrice / (calculateNights(values.checkIn, values.checkOut) * values.numberOfRooms))}
+              </Typography>
+            </div>
+            <div className="flex justify-between">
+              <Typography variant="small" textColor="primary">Nights:</Typography>
+              <Typography variant="small" textColor="primary" className="font-medium">
+                {calculateNights(values.checkIn, values.checkOut)}
+              </Typography>
+            </div>
+            <div className="flex justify-between">
+              <Typography variant="small" textColor="primary">Rooms:</Typography>
+              <Typography variant="small" textColor="primary" className="font-medium">
+                {values.numberOfRooms}
+              </Typography>
+            </div>
+          </div>
+
+          {/* Payment Info */}
+          <div className="text-xs text-gray-600 bg-white bg-opacity-60 rounded-lg p-3 text-center">
+            <Typography variant="small" textColor="primary">
+              💳 Pay at the property during check-in
+            </Typography>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

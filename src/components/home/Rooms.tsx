@@ -237,18 +237,6 @@ const Rooms = () => {
                     images={room.images || []} 
                     roomName={room.name} 
                   />
-
-                  {/* Capacity Badge */}
-                  <div className="absolute top-4 right-4 bg-[#7570BC] text-white px-3 py-1 rounded-full z-10">
-                    <Typography
-                      variant="small"
-                      textColor="white"
-                      weight="semibold"
-                    >
-                      Up to {room.capacity} Guests
-                    </Typography>
-                  </div>
-
                   <div className="p-5 sm:p-6">
                     <Typography
                       variant="h4"
@@ -291,7 +279,7 @@ const Rooms = () => {
                           textColor="secondary"
                           as="span"
                         >
-                          {" / night"}
+                          {" / night + 18% GST"}
                         </Typography>
                       </div>
                       <button
