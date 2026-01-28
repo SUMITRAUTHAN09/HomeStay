@@ -1,3 +1,4 @@
+/*use typography for making similer every tags in project*/
 import React from "react";
 
 /* Utility */
