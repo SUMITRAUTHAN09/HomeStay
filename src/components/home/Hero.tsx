@@ -41,7 +41,7 @@ const Hero: React.FC<HeroProps> = ({ canvasRef }) => {
         >
           A Perfect Time for
           <br />
-          <span className="text-[#7570BC]">Relax and Chill</span>
+          <span className="text-[#f0f0f0]">Relax and Chill</span>
         </Typography>
 
         <Typography
@@ -50,7 +50,7 @@ const Hero: React.FC<HeroProps> = ({ canvasRef }) => {
           align="center"
           className="mb-6 sm:mb-8 max-w-2xl mx-auto"
         >
-         Escape the noise and step into a space where mountains, silence, and fresh air come together. A place designed to relax, slow down, and truly unwind.
+        <strong>Escape the noise and step into a space where mountains, silence, and fresh air come together. A place designed to relax, slow down, and truly unwind.</strong>
         </Typography>
         {/* comment for commit */}
         <div className="flex flex-col sm:flex-row gap-5 md:gap-35 justify-center">
